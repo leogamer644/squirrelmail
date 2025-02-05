@@ -1,0 +1,30 @@
+---
+  - name: install Software and configure
+    hosts: all
+    become: yes
+    tasks:
+      - name: Update apt cache
+        ansible.builtin.apt:
+          update_cache: yes
+      - name: Install stuff with package manager
+        ansible.builtin.apt:
+          name: dovecot-imapd, dovecot-core, php, libapache2-mod-php, apache2, postfix, bind9, bind9utils, bind9-doc, wget, tar
+          state: present
+      - name: Download SquirrelMail
+        ansible.builtin.get_url:
+          url: https://www.squirrelmail.org/countdl.php?fileurl=http%3A%2F%2Fprdownloads.sourceforge.net%2Fsquirrelmail%2Fsquirrelmail-webmail-1.4.22.tar.gz
+          dest: /tmp/squirrelmail.tgz
+      - name: create directory Squirrel
+        ansible.builtin.file:
+          path: /tmp/squirrel
+          state: directory
+      - name: Extract SquirrelMail
+        ansible.builtin.unarchive:
+          src: /tmp/squirrelmail.tgz
+          dest: /tmp/squirrel
+          remote_src: yes
+      - name: Copy SquirrelMail to webserver
+        ansible.builtin.copy:
+          src: /tmp/squirrel/squirrelmail-webmail-1.4.22/
+          dest: /var/www/mail/
+          remote_src: yes
